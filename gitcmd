@@ -3,7 +3,7 @@
 #
 
 USUARIO=paulo.machado
-SENHA=Virus%402021
+SENHA=$SENHAGIT
 SITE=builder.saude.df.gov.br/projetls/
 
 # Verifica sintaxe
