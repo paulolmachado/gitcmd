@@ -1,0 +1,88 @@
+#
+# Script para automatizar as rotinas de git
+#
+
+USUARIO=paulo.machado
+SENHA=Virus%402021
+SITE=builder.saude.df.gov.br/projetls/
+
+# Verifica sintaxe
+if [ $# -lt 1 ]; then
+	echo "Sintaxe:"
+	echo "   gitcmd clone [projeto]                   # Clonar"
+	echo "   gitcmd pull                              # Trazer/sincronizar"
+	echo "   gitcmd push \"[descricao]\"            # Enviar alteracoes"
+	echo "   gitcmd renomear OLD-FILENAME NEW-FILENAME"     # Enviar alteracoes"
+	exit 1
+fi
+
+if [ $1 = "clone" ]; then
+	# Verifica se está em um diretorio com git
+	if [ -d .git ]; then
+		echo "Nao pode clonar em diretorio que ja eh clonado."
+		exit 1
+	fi
+
+	# Verifica se o nome do projeto foi informado
+	if [ "x$2" = "x" ]; then
+		echo "Eh necessario informar o nome do projeto."
+		echo "Sintaxe: gitcmd clone [projeto]"
+		exit 1
+	fi
+
+	PROJETO=$2
+	git -c http.sslVerify=false clone https://${USUARIO}:${SENHA}@${SITE}${PROJETO}.git
+
+	cd $PROJETO
+	git config http.sslVerify false
+fi
+
+
+if [ $1 = "pull" ]; then
+	# Verifica se está em um diretorio com git
+	if [ ! -d .git ]; then
+		echo Nao esta em um diretorio com clone
+		exit 1
+	fi
+
+	git -c http.sslVerify=false pull
+fi
+
+if [ $1 = "push" ]; then
+	# Verifica se está em um diretorio com git
+	if [ ! -d .git ]; then
+		echo Nao esta em um diretorio com clone
+		exit 1
+	fi
+
+	# Verifica se o comentario para o commit foi informado.
+	if [ "x$2" = "x" ]; then
+		echo "Eh necessario informar a descricao da alteracao para o commit."
+		echo "Sintaxe: gitcmd push \"[descricao]\""
+		exit 1
+	fi
+	COMENTARIO=$2
+
+	git -c http.sslVerify=false add .
+	git -c http.sslVerify=false commit -m "$COMENTARIO"
+	git -c http.sslVerify=false push
+fi
+
+if [ $1 = "renomear" ]; then
+	# Verifica se está em um diretorio com git
+	if [ ! -d .git ]; then
+		echo Nao esta em um diretorio com clone
+		exit 1
+	fi
+
+	# Verifica se foram passados o antigo e novo nome do arquivo
+	if [ "x$3" = "x" ]; then
+		echo "Eh necessario informar o antigo e novo nome do arquivo."
+		echo "Sintaxe: gitcmd renomear OLD-FILENAME NEW-FILENAME"
+		exit 1
+	fi
+	ANTIGO=$2
+	NOVO=$3
+
+	git -c http.sslVerify=false mv "$ANTIGO" "$NOVO"
+fi
